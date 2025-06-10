@@ -9,6 +9,7 @@ class ArchiveController:
         # structure: nested dict of headers → subheaders → sections → subsections
         self.structure = structure
         self.archives_path = archives_path
+        self.folder_cache = {}
 
     def get_dynamic_folder_options(self, base_folder_path, template_options):
         """
@@ -21,14 +22,19 @@ class ArchiveController:
         Returns:
             list[str]: Combined and sorted unique folder names.
         """
+        if base_folder_path in self.folder_cache:
+            logging.debug(f"Cache hit for '{base_folder_path}'")
+            return self.folder_cache[base_folder_path]
+
+        logging.debug(f"Cache miss for '{base_folder_path}'. Scanning disk.")
         disk_folders = set()
         template_folders = set()
 
-        if os.path.isdir(base_folder_path):
+        if os.path.isdir(base_folder_path): # Keep this check for the base path itself
             try:
-                for item in os.listdir(base_folder_path):
-                    if os.path.isdir(os.path.join(base_folder_path, item)) and not item.startswith('.'):
-                        disk_folders.add(item)
+                for entry in os.scandir(base_folder_path):
+                    if entry.is_dir() and not entry.name.startswith('.'):
+                        disk_folders.add(entry.name)
             except OSError as e:
                 logging.warning(f"Could not scan directory '{base_folder_path}': {e}")
         else:
@@ -40,5 +46,25 @@ class ArchiveController:
             template_folders = set(template_options)
 
         combined = sorted(template_folders.union(disk_folders))
-        logging.debug(f"Combined options for '{base_folder_path}': {combined}")
+        logging.debug(f"Combined options for '{base_folder_path}': {combined}. Caching result.")
+        self.folder_cache[base_folder_path] = combined
         return combined
+
+    def clear_cache(self, path_prefix=None):
+        """
+        Clears the folder cache.
+
+        Args:
+            path_prefix (str, optional): If provided, only cache entries where the path
+                                         starts with this prefix will be cleared.
+                                         If None, the entire cache is cleared.
+        """
+        if path_prefix is None:
+            self.folder_cache.clear()
+            logging.info("ArchiveController cache fully cleared.")
+        else:
+            # Iterate over a copy of keys if modifying the dict
+            for cached_path in list(self.folder_cache.keys()):
+                if cached_path.startswith(path_prefix):
+                    del self.folder_cache[cached_path]
+            logging.info(f"ArchiveController cache cleared for prefix: {path_prefix}")

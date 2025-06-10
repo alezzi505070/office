@@ -1166,6 +1166,11 @@ class FileArchiveApp:
     def refresh_folders(self):
         def task():
             try:
+                # Clear the ArchiveController cache first
+                if hasattr(self, 'archive_controller'):
+                    self.archive_controller.clear_cache()
+                    logging.info("Admin triggered folder refresh, clearing full ArchiveController cache.")
+
                 for root, dirs, _ in os.walk(self.archives_path):
                     for d in dirs:
                         show_path = os.path.join(root, d)
@@ -2948,7 +2953,8 @@ class FileArchiveApp:
                 "company_display_name": company_display_name,
                 "add_struct_win": add_struct_win, # Pass references carefully
                 "add_button": add_button,         # Pass references carefully
-                "original_button_text": original_button_text
+                "original_button_text": original_button_text,
+                "parent_path_of_new_folder": parent_path # Pass the actual parent path
             }
             # Put the success handling function onto the UI queue
             self.ui_queue.put(lambda info=success_info: self._handle_folder_creation_success(info))
@@ -2976,6 +2982,7 @@ class FileArchiveApp:
         new_name = info["new_name"]
         target_level_description = info["target_level_description"]
         company_display_name = info["company_display_name"]
+        parent_path_of_new_folder = info.get("parent_path_of_new_folder")
 
         # Restore UI elements first
         if add_struct_win.winfo_exists():
@@ -2993,6 +3000,11 @@ class FileArchiveApp:
             # Destroy dialog *after* message
             if add_struct_win.winfo_exists():
                  add_struct_win.destroy()
+
+        # Clear cache for the parent path where the new folder was added
+        if parent_path_of_new_folder and hasattr(self, 'archive_controller'):
+            self.archive_controller.clear_cache(path_prefix=parent_path_of_new_folder)
+            logging.info(f"Cleared archive_controller cache for prefix: {parent_path_of_new_folder}")
 
         # Trigger Dropdown Refresh
         delay_ms = 50 # Shorter delay might be ok now
