@@ -339,8 +339,9 @@ class FileArchiveApp:
     # In switch_language method:
     def switch_language(self):
         """Switches the application language and rebuilds the UI."""
-        global CURRENT_LANGUAGE
+        global CURRENT_LANGUAGE # This refers to the CURRENT_LANGUAGE from translations.py due to the import
         new_lang = "ar" if CURRENT_LANGUAGE == "en" else "en"
+        logging.debug(f"FileArchiveApp.switch_language: Attempting to switch. Current T_GLOBAL_CURRENT_LANGUAGE (from translations.py) before call: '{CURRENT_LANGUAGE}'. Determined new_lang: '{new_lang}'.")
         current_display = self.tabview.get() # Get displayed name BEFORE switch
         selected_key = None # Key like "tab_upload_files"
 
@@ -368,7 +369,11 @@ class FileArchiveApp:
             logging.warning(f"Could not determine the key for the currently selected tab '{current_display}'. Will default to first tab after switch.")
 
         # --- Proceed with language switch ---
-        if set_language(new_lang):
+        logging.debug(f"FileArchiveApp.switch_language: Calling set_language('{new_lang}').")
+        switch_success = set_language(new_lang)
+        logging.debug(f"FileArchiveApp.switch_language: set_language('{new_lang}') returned: {switch_success}.")
+        logging.debug(f"FileArchiveApp.switch_language: T_GLOBAL_CURRENT_LANGUAGE (from translations.py) after call: '{CURRENT_LANGUAGE}'.")
+        if switch_success:
             # self.load_app_translations() # Reload translations for the new language # Removed
             # Rebuild UI using the identified key to re-select the tab later
             self._rebuild_ui_for_language(selected_key)
