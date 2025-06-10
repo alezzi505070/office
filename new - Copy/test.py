@@ -134,16 +134,16 @@ class FileArchiveApp:
     SUPPORTED_FILE_EXTENSIONS = SUPPORTED_FILE_EXTENSIONS # Use the constant
     def _t(self, key):
         """Looks up the translation for a key in the dictionary."""
-        current_translations = self.translations if isinstance(self.translations, dict) else {}
-        return current_translations.get(key, f"_{key}_")
+        # current_translations = self.translations if isinstance(self.translations, dict) else {}
+        # return current_translations.get(key, f"_{key}_")
+        return get_translation(key)
 
     def __init__(self):
         # Initialize current_user first, before it's referenced
         global DRAG_DROP_ENABLED
         self.current_user = None
-        self.translations = {} # Initialize translation dictionary
-
-        self.load_app_translations() # Load translations based on CURRENT_LANGUAGE
+        # self.translations = {} # Initialize translation dictionary # Removed
+        # self.load_app_translations() # Load translations based on CURRENT_LANGUAGE # Removed
 
         # --- Database and Controllers ---
         self.initialize_user_database() # Connects and loads users into global `users` dict
@@ -369,7 +369,7 @@ class FileArchiveApp:
 
         # --- Proceed with language switch ---
         if set_language(new_lang):
-            self.load_app_translations() # Reload translations for the new language
+            # self.load_app_translations() # Reload translations for the new language # Removed
             # Rebuild UI using the identified key to re-select the tab later
             self._rebuild_ui_for_language(selected_key)
         else:
@@ -576,19 +576,19 @@ class FileArchiveApp:
             TRANSLATIONS = {"en": {}, "ar": {}}
             return TRANSLATIONS.get(CURRENT_LANGUAGE, {})
     # Add this helper method inside FileArchiveApp class
-    def load_app_translations(self):
-        """Loads translations for the current language into the instance."""
-        global CURRENT_LANGUAGE
-        try:
-            # Assuming load_translations returns the dict for the language
-            self.translations = load_translations(CURRENT_LANGUAGE)
-            if not self.translations:
-                logging.warning(f"Loaded translations for '{CURRENT_LANGUAGE}' appear empty.")
-            else:
-                logging.info(f"Loaded {len(self.translations)} translations for '{CURRENT_LANGUAGE}'.")
-        except Exception as e:
-            logging.error(f"Failed to load translations for language '{CURRENT_LANGUAGE}': {e}", exc_info=True)
-            self.translations = {} # Ensure it's an empty dict on failure
+    # def load_app_translations(self): # Removed
+    #     """Loads translations for the current language into the instance.""" # Removed
+    #     global CURRENT_LANGUAGE # Removed
+    #     try: # Removed
+    #         # Assuming load_translations returns the dict for the language # Removed
+    #         self.translations = load_translations(CURRENT_LANGUAGE) # Removed
+    #         if not self.translations: # Removed
+    #             logging.warning(f"Loaded translations for '{CURRENT_LANGUAGE}' appear empty.") # Removed
+    #         else: # Removed
+    #             logging.info(f"Loaded {len(self.translations)} translations for '{CURRENT_LANGUAGE}'.") # Removed
+    #     except Exception as e: # Removed
+    #         logging.error(f"Failed to load translations for language '{CURRENT_LANGUAGE}': {e}", exc_info=True) # Removed
+    #         self.translations = {} # Ensure it's an empty dict on failure # Removed
 
     # Add this helper method inside FileArchiveApp class
     def _create_tabs(self):
