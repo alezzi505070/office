@@ -74,10 +74,10 @@ set_language("en") # Or "ar" if you want Arabic default
 # ------------------------------------------------------------------------------
 logging.basicConfig(
     filename='archive_app.log',
-    level=logging.INFO,
+    level=logging.DEBUG,  # Changed this line
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
-
+logging.critical("CRITICAL_LOG: Logging configured at DEBUG level.") # Added this line
 # ------------------------------------------------------------------------------
 # In-Memory User Store (for demo purposes only; use a database or external config in production)
 # ------------------------------------------------------------------------------
@@ -139,6 +139,7 @@ class FileArchiveApp:
         return get_translation(key)
 
     def __init__(self):
+        logging.critical("CRITICAL_LOG: FileArchiveApp __init__ started.") # Added this line
         # Initialize current_user first, before it's referenced
         global DRAG_DROP_ENABLED
         self.current_user = None
@@ -341,11 +342,11 @@ class FileArchiveApp:
         """Switches the application language and rebuilds the UI."""
         global CURRENT_LANGUAGE # This refers to the CURRENT_LANGUAGE from translations.py due to the import
         new_lang = "ar" if CURRENT_LANGUAGE == "en" else "en"
-        logging.debug(f"FileArchiveApp.switch_language: Attempting to switch. Current T_GLOBAL_CURRENT_LANGUAGE (from translations.py) before call: '{CURRENT_LANGUAGE}'. Determined new_lang: '{new_lang}'.")
+        logging.debug(f"FileArchiveApp.switch_language: Attempting to switch. Current CURRENT_LANGUAGE (from translations.py) before call: '{CURRENT_LANGUAGE}'. Determined new_lang: '{new_lang}'.") # Corrected T_GLOBAL_CURRENT_LANGUAGE to CURRENT_LANGUAGE
         current_display = self.tabview.get() # Get displayed name BEFORE switch
         selected_key = None # Key like "tab_upload_files"
 
-        logging.info(f"Attempting to switch language from {CURRENT_LANGUAGE} to {new_lang}")
+        logging.info(f"Attempting to switch language from {CURRENT_LANGUAGE} to {new_lang}") # This CURRENT_LANGUAGE is the global one from translations.py
         logging.info(f"Current displayed tab name: '{current_display}'")
 
         # Define the keys for the tabs that can exist
@@ -372,7 +373,7 @@ class FileArchiveApp:
         logging.debug(f"FileArchiveApp.switch_language: Calling set_language('{new_lang}').")
         switch_success = set_language(new_lang)
         logging.debug(f"FileArchiveApp.switch_language: set_language('{new_lang}') returned: {switch_success}.")
-        logging.debug(f"FileArchiveApp.switch_language: T_GLOBAL_CURRENT_LANGUAGE (from translations.py) after call: '{CURRENT_LANGUAGE}'.")
+        logging.debug(f"FileArchiveApp.switch_language: CURRENT_LANGUAGE (from translations.py) after call: '{CURRENT_LANGUAGE}'.") # Corrected T_GLOBAL_CURRENT_LANGUAGE to CURRENT_LANGUAGE
         if switch_success:
             # self.load_app_translations() # Reload translations for the new language # Removed
             # Rebuild UI using the identified key to re-select the tab later
